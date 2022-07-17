@@ -59,6 +59,8 @@ const Pokedex = () => {
         setInputValue={setInputValue}
       />
       <StyledResultSection>
+        {/* ToDo: Why is this not updated? */}
+        {console.log(foundResults)}
         {foundResults &&
           foundResults.map((pokemon, i) => {
             return <p key={i}>{pokemon.name}</p>;
