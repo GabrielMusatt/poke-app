@@ -36,7 +36,42 @@ const StyledSearchSection = styled.div`
 const StyledResultSection = styled.div`
   background-color: ${PokeBlack};
   color: ${PokeWhite};
-  ${commonStyles}
+  padding: 20px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+`;
+
+const StyledSearchCard = styled.div`
+  padding: 10px;
+  box-sizing: border-box;
+
+  .card-content {
+    background-color: ${PokeRed};
+    height: 100%;
+    width: 100%;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    box-sizing: border-box;
+
+    .card-description {
+      background-color: ${PokeWhite};
+      color: ${PokeBlack};
+      font-weight: bold;
+      text-transform: capitalize;
+      padding: 10px;
+      border-radius: 10px;
+      text-align: center;
+
+      .pokemon-type {
+        margin: 0;
+        font-size: 80%;
+      }
+    }
+  }
 `;
 
 const StyledOwnedSection = styled.div`
@@ -50,4 +85,5 @@ export {
   StyledSearchSection,
   StyledResultSection,
   StyledOwnedSection,
+  StyledSearchCard,
 };
