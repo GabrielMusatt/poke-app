@@ -12,19 +12,29 @@ const Pokedex = () => {
   const [inputValue, setInputValue] = useState("");
   const [foundResults, setFoundResults] = useState(pokemonlist);
 
-  fetch("https://pokeapi.co/api/v2/pokemon?limit=10000").then((response) =>
-    response.json().then((name) => pokemonlist.push(...name.results))
-  );
+  fetch("https://pokeapi.co/api/v2/pokemon?limit=10000")
+    .then((response) => response.json())
+    .then((name) => {
+      pokemonlist.push(...name.results);
+    });
+
+  pokemonlist.map((a) => {
+    return a;
+  });
 
   useEffect(() => {
     setFoundResults(foundResults);
   }, [inputValue]);
 
   const handlesPokes = (event) => {
-    console.log(event.target.value);
-    results = [...pokemonlist].filter((a) => {
-      if (a.name.startsWith(event.target.value)) {
-        return a;
+    // console.log(event.target.value);
+    results = [...pokemonlist].filter((pokemon) => {
+      if (pokemon.name.startsWith(event.target.value)) {
+        const newPokemon = { ...pokemon, x: "x" };
+
+        console.log(newPokemon, "new");
+
+        return newPokemon;
       }
     });
 
@@ -38,8 +48,13 @@ const Pokedex = () => {
         inputValue={inputValue}
         setInputValue={setInputValue}
       />
-      <StyledResultSection>Result section</StyledResultSection>
-      <StyledOwnedSection>Selected</StyledOwnedSection>
+      <StyledResultSection>
+        {foundResults &&
+          foundResults.map((pokemon, i) => {
+            return <p key={i}>{pokemon.name}</p>;
+          })}
+      </StyledResultSection>
+      <StyledOwnedSection>Owned</StyledOwnedSection>
     </StyledPokedex>
   );
 };
