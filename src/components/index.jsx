@@ -31,7 +31,17 @@ const Pokedex = () => {
     results = [...pokemonlist].filter((pokemon) => {
       if (pokemon.name.startsWith(event.target.value)) {
         const newPokemon = { ...pokemon, x: "x" };
+        newPokemon.x = "y";
 
+        fetch(pokemon.url)
+          .then((response) => response.json())
+          .then((stat) => {
+            newPokemon.x = stat;
+            console.log(stat, "stat");
+            console.log(newPokemon.x, "newPokemon.x");
+          });
+
+        // ToDo: why the value from fetch above ("newPokemon.x") is not seen in the consle below?
         console.log(newPokemon, "new");
 
         return newPokemon;
