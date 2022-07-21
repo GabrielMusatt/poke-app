@@ -3,52 +3,73 @@ import {
   StyledPokedex,
   StyledResultSection,
   StyledOwnedSection,
+  StyledSearchCard,
 } from "./styled";
 import PokeSearch from "./Search";
+import pokeType from "./pokeTypes";
 
 const Pokedex = () => {
-  let pokemonlist = [];
   let results = [];
   const [inputValue, setInputValue] = useState("");
-  const [foundResults, setFoundResults] = useState(pokemonlist);
-
-  fetch("https://pokeapi.co/api/v2/pokemon?limit=10000")
-    .then((response) => response.json())
-    .then((name) => {
-      pokemonlist.push(...name.results);
-    });
-
-  pokemonlist.map((a) => {
-    return a;
-  });
+  const [allPokemons, setAllPokemons] = useState([]);
+  const [foundPokemons, setFoundPokemons] = useState([]);
 
   useEffect(() => {
-    setFoundResults(foundResults);
+    fetch("https://pokeapi.co/api/v2/pokemon?limit=100000")
+      .then((response) => response.json())
+      .then((name) => {
+        setAllPokemons([...allPokemons, ...name.results]);
+      });
+    console.log(allPokemons, "allPokemons");
+    setAllPokemons(allPokemons);
   }, [inputValue]);
 
   const handlesPokes = (event) => {
-    // console.log(event.target.value);
-    results = [...pokemonlist].filter((pokemon) => {
-      if (pokemon.name.startsWith(event.target.value)) {
-        const newPokemon = { ...pokemon, test: "a" };
-        newPokemon.test = "b";
+    console.log(event.target.value);
+    results = [];
+    results = [...allPokemons].filter((pokemon) => {
+      if (
+        pokemon.name.startsWith(event.target.value) &&
+        event.target.value.length > 2
+      ) {
+        const newPokemon = { ...pokemon };
+
+        let pokemonExist = false;
 
         fetch(pokemon.url)
           .then((response) => response.json())
-          .then((stat) => {
-            newPokemon.test = stat;
-            console.log(stat, "stat");
-            console.log(newPokemon.test, "newPokemon.test");
+          .then((pokeStats) => {
+            newPokemon.stats = pokeStats;
+            console.log(pokeStats, "stat");
+            console.log(newPokemon.stats, "newPokemon.stats");
+
+            console.log(newPokemon, "new");
+            console.log(results, "results");
+
+            for (let i = 0; i < results.length; i++) {
+              console.log(results[i], "result stats");
+              console.log(newPokemon, "newPokemon result");
+
+              if (results[i].name === newPokemon.name) {
+                pokemonExist = true;
+              }
+            }
+
+            if (!pokemonExist) {
+              results.push(newPokemon);
+              results.sort((a, b) => {
+                return a.name < b.name ? -1 : a.name < b.name ? 1 : 0;
+              });
+            }
+            pokemonExist = false;
           });
-
-        // ToDo: why the value from fetch above ("newPokemon.test") is not seen in the consle below?
-        console.log(newPokemon, "new");
-
-        return newPokemon;
+      } else {
+        results = [];
       }
     });
+    console.log(results, "results");
 
-    setFoundResults(results);
+    setFoundPokemons(results);
   };
 
   return (
@@ -58,14 +79,32 @@ const Pokedex = () => {
         inputValue={inputValue}
         setInputValue={setInputValue}
       />
-      <StyledResultSection>
-        {/* ToDo: Why is this not updated? */}
-        {console.log(foundResults)}
-        {foundResults &&
-          foundResults.map((pokemon, i) => {
-            return <p key={i}>{pokemon.name}</p>;
-          })}
-      </StyledResultSection>
+      {foundPokemons && foundPokemons.length ? (
+        <StyledResultSection>
+          {foundPokemons &&
+            foundPokemons.map((pokemon) => {
+              return (
+                <>
+                  {console.log(pokemon, "inside poke")}
+                  <StyledSearchCard key={pokemon.stats.id}>
+                    <div className="card-content">
+                      <img
+                        src={pokemon.stats.sprites.front_default}
+                        alt={`${pokemon.name} photo`}
+                      />
+                      <div className="card-description">
+                        {pokemon.name.split("-").join(" ")}
+                        <p className="pokemon-type">
+                          {pokeType(pokemon.stats.types[0].type.name)}
+                        </p>
+                      </div>
+                    </div>
+                  </StyledSearchCard>
+                </>
+              );
+            })}
+        </StyledResultSection>
+      ) : null}
       <StyledOwnedSection>Owned</StyledOwnedSection>
     </StyledPokedex>
   );
