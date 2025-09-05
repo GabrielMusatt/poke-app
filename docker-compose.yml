@@ -1,0 +1,8 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: gabe_db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3307:3306" #Docker forwards any request from localhost:3307 (my computer) → container:3306 (mySQL).
