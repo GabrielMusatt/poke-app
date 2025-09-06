@@ -1,23 +1,53 @@
 
-# Run this command after cloning:
 
-# -------------- install composer
-# composer install
+# Setup
 
-# -------------- copy .env file
-# cp .env.example .env
+## clone project:
+git clone git@github.com:GabrielMusatt/poke-app.git
+##
 
-# -------------- also add those constants to .env:
-# DB_CONNECTION=mysql
-# DB_HOST=gabe_db     
-# DB_PORT=3306
-# DB_DATABASE=pokeapp ted
-# DB_USERNAME=root
-# DB_PASSWORD=root  
+## copy .env file
+cp .env.example .env
+##
 
-# -------------- generate key
-# php artisan key:generate
+## Add this to .env file (and delete duplicates):
 
-# php artisan migrate --seed
-# docker rm -f gabe_db
-# docker compose up -d
+##### DB_CONNECTION=mysql
+##### DB_HOST=127.0.0.1
+##### DB_PORT=3307
+##### DB_DATABASE=pokeapp
+##### DB_USERNAME=root
+##### DB_PASSWORD=root
+##### CACHE_STORE=file
+##### SESSION_DRIVER=file
+##### QUEUE_CONNECTION=sync
+##
+
+## run docker:
+docker compose up -d
+
+
+## PHP deps:
+composer install
+##
+
+## Generate app key (first time only)
+php artisan key:generate
+##
+
+## Make sure Laravel reads fresh config
+php artisan optimize:clear
+php artisan config:cache
+##
+
+## Create DB from Laravel (your custom command)
+php artisan db:create
+##
+
+## Run schema + seeders
+php artisan migrate --seed
+##
+
+## Run the app
+php artisan serve
+##
