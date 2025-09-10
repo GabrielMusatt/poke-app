@@ -19,22 +19,11 @@ cd poke-app
 cp .env.example .env
 ##
 
-## 3. Add this to .env file (and delete duplicates):
-
-##### DB_CONNECTION=mysql
-##### DB_HOST=127.0.0.1
-##### DB_PORT=3307
-##### DB_DATABASE=pokeapp
-##### DB_USERNAME=root
-##### DB_PASSWORD=root
-##### CACHE_STORE=file
-##### SESSION_DRIVER=file
-##### QUEUE_CONNECTION=sync
-##
+## 3. Check .env
 
 ## 4. run docker:
 docker compose up -d
-
+##
 
 ## 5. PHP deps:
 composer install
