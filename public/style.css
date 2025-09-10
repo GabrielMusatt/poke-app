@@ -1,0 +1,42 @@
+body {
+    font-family: system-ui, sans-serif;
+    max-width: 1000px;
+    margin: 24px auto;
+}
+
+h1 {
+    margin-bottom: 16px;
+}
+
+.alert-error {
+    padding: 8px 12px;
+    background: #fff3f3;
+    border: 1px solid #f5c2c7;
+    border-radius: 6px;
+    color: #842029;
+    margin-bottom: 12px;
+}
+
+.alert-success {
+    padding: 8px 12px;
+    background: #e8fff1;
+    border: 1px solid #b9f3cf;
+    border-radius: 6px;
+    color: #065f46;
+    margin-bottom: 12px;
+}
+
+form {
+    margin-bottom: 24px;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+table th,
+table td {
+    border: 1px solid #ccc;
+    padding: 6px;
+}
