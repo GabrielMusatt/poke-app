@@ -25,7 +25,9 @@ Route::get('/', function () {
     $errorsBag = session('errors');         
     // and turn into array
     $errors    = $errorsBag ? $errorsBag->all() : [];
-    $success   = session('success');               
+    $success   = session('success');    
+    
+    $h = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES);
 
     // Start building HTML output
     $html  = '<!doctype html>';
@@ -57,18 +59,27 @@ Route::get('/', function () {
 
 
     // form
-    $html .= '<form method="POST" action="/add">';
+    $html .= '<form method="POST" action="/add" class="form-card">';
     $html .= '<input type="hidden" name="_token" value="'.$token.'">';
-    $html .= '<label>Name <input name="name" required></label> ';
-    $html .= '<label>Email <input type="email" name="email" required></label> ';
-    $html .= '<label>Password <input type="password" name="password" required></label> ';
-    $html .= '<button type="submit">Save</button>';
-    $html .= '</form>';
+    $html .= '<div class="form-grid">';
+
+    $html .= '<label class="field span-3"><span>Name</span><input class="input" name="name" required value="'.$h(old('name')).'"></label>';
+    $html .= '<label class="field span-4"><span>Email</span><input class="input" type="email" name="email" required value="'.$h(old('email')).'"></label>';
+    $html .= '<label class="field span-3"><span>Password</span><input class="input" type="password" name="password" required></label>';
+
+    $html .= '<label class="field span-2"><span>City</span><input class="input" name="city" value="'.$h(old('city')).'"></label>';
+    $html .= '<label class="field span-2"><span>State</span><input class="input" name="state" value="'.$h(old('state')).'"></label>';
+    $html .= '<label class="field span-3"><span>Job</span><input class="input" name="job" value="'.$h(old('job')).'"></label>';
+    $html .= '<label class="field span-2"><span>Salary</span><input class="input" type="number" step="1" name="salary" value="'.$h(old('salary')).'"></label>';
+    $html .= '<label class="field span-12"><span>Description</span><input class="input" name="description" value="'.$h(old('description')).'"></label>';
+
+    $html .= '<div class="form-actions"><button class="btn" type="submit">Save</button></div>';
+    $html .= '</div></form>';
 
     // table
     $html .= '<table><thead><tr>';
     $html .= '<th>ID</th><th>Name</th><th>Email</th><th>City</th><th>State</th>';
-    $html .= '<th>Job</th><th>Salary</th><th>Description</th></tr></thead><tbody>';
+    $html .= '<th>Job</th><th>Salary</th><th>Description</th><th>Actions</th></tr></thead><tbody>';
 
     foreach ($rows as $r) {
         $html .= '<tr>';
@@ -80,6 +91,7 @@ Route::get('/', function () {
         $html .= '<td>'.$r->job.'</td>';
         $html .= '<td>'.$r->salary.'</td>';
         $html .= '<td>'.$r->description.'</td>';
+        $html .= '<td>xxx</td>';
         $html .= '</tr>';
     }
 
@@ -90,29 +102,32 @@ Route::get('/', function () {
 
 Route::post('/add', function (Request $request) {
     $data = $request->validate([
-        'name'     => 'required|string|max:100',
-        'email'    => 'required|email|unique:users,email', 
-        'password' => 'required|string|min:4',
+        'name'        => 'required|string|max:100',
+        'email'       => 'required|email|unique:users,email',
+        'password'    => 'required|string|min:4',
+        'city'        => 'nullable|string|max:255',
+        'state'       => 'nullable|string|max:255',
+        'job'         => 'nullable|string|max:255',
+        'salary'      => 'nullable|numeric|min:0',
+        'description' => 'nullable|string|max:2000',
     ]);
 
-    // Insert user
+    // Insert user (city/state can be null or empty → store as null)
     $id = DB::table('users')->insertGetId([
         'name'     => $data['name'],
         'email'    => $data['email'],
         'password' => Hash::make($data['password']),
-        'city'     => null,
-        'state'    => null,
+        'city'     => $data['city']  !== '' ? $data['city']  : null,
+        'state'    => $data['state'] !== '' ? $data['state'] : null,
     ]);
 
-   DB::table('specs')->insert([
-    'user_id'     => $id,
-    // empty string instead of NULL
-    'job'         => (string) $request->input('job', ''),                
-     // 0 instead of NULL
-    'salary'      => $request->filled('salary') ? (float) $request->input('salary') : 0,   
-    // empty string instead of NULL                                 
-    'description' => (string) $request->input('description', ''),
-  ]);
+    // Insert specs (always create a row; defaults if missing)
+    DB::table('specs')->insert([
+        'user_id'     => $id,
+        'job'         => $data['job']         ?? '',
+        'salary'      => isset($data['salary']) ? (float)$data['salary'] : 0,
+        'description' => $data['description'] ?? '',
+    ]);
 
     return redirect('/')->with('success', "User #{$id} added.");
 });
