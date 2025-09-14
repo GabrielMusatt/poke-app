@@ -124,7 +124,8 @@ Route::get('/', function (Request $req) {
 
     $html = "";
     $html .= "<!DOCTYPE html><html><head><meta charset='UTF-8'>";
-    $html .= "<link rel='stylesheet' href='/style.css'>";
+    $html .= "<link rel='stylesheet' href='/css/style.css'>";
+    $html .= "<script src='/js/app.js' defer></script>";
     $html .= "<title>Users</title></head><body>";
 
     $html .= "<div id='alerts'>";
@@ -163,77 +164,6 @@ Route::get('/', function (Request $req) {
     $html .= "<tbody id='users-tbody'>" . render_rows($rows, $token, $editing) . "</tbody>";
     $html .= "</table>";
 
-    // Minimal JS to Ajaxify forms
-    $html .= "<script>
-    function showAlert(msg, type){
-        const box = document.getElementById('alerts');
-        const div = document.createElement('div');
-        div.className = 'alert ' + (type || 'success');
-        div.textContent = msg;
-        box.innerHTML = '';
-        box.appendChild(div);
-    }
-
-    async function handleAjaxSubmit(e){
-        const form = e.target.closest('form.ajax-form');
-        if(!form) return;
-        e.preventDefault();
-
-        const btn = form.querySelector('button[type=submit]');
-        if(btn){ btn.disabled = true; }
-
-        try{
-            const res = await fetch(form.action, {
-                method: form.method || 'POST',
-                body: new FormData(form),
-                headers: { 'X-Requested-With': 'XMLHttpRequest' }
-            });
-
-            if(res.status === 422){
-                const data = await res.json();
-                const messages = [];
-                if (data.errors){
-                    for (const k in data.errors){ messages.push(data.errors[k][0]); }
-                } else if (data.message){ messages.push(data.message); }
-                showAlert(messages.join('\\n'), 'error');
-                return;
-            }
-
-            // Expect JSON: { ok:true, html:'<tbody>...</tbody>', message:'...' }
-            const data = await res.json();
-            if(data && data.html){
-                document.getElementById('users-tbody').innerHTML = data.html;
-            }
-            if(data && data.message){
-                showAlert(data.message, data.ok ? 'success' : 'error');
-            }
-        }catch(err){
-            showAlert('Network error', 'error');
-        }finally{
-            if(btn){ btn.disabled = false; }
-        }
-    }
-
-    document.addEventListener('submit', handleAjaxSubmit);
-
-
-    async function openInlineEdit(id){
-    const res = await fetch('/inline-edit/' + id, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
-    const data = await res.json();
-    if (data && data.html) {
-        document.getElementById('users-tbody').innerHTML = data.html;
-    }
-    }
-
-    document.addEventListener('click', function(e){
-    const btn = e.target.closest('.edit-btn');
-    if (!btn) return;
-    e.preventDefault();           // <- stops navigation
-    const id = btn.getAttribute('data-id');
-    openInlineEdit(id);
-    });
-    </script>";
-
     $html .= "</body></html>";
     return $html;
 });
@@ -270,7 +200,6 @@ Route::get('/inline-edit/{id}', function ($id) {
         'html' => render_rows($rows, csrf_token(), $editing),
     ]);
 });
-
 
 // --------------------
 // POST "/store" — create
