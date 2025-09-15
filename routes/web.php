@@ -1,20 +1,21 @@
 <?php
 
-
 // ------------------------------
 // Laravel facades/classes
 // ------------------------------
-// Route     = defines HTTP endpoints (GET/POST/etc) and their handlers
-// DB        = run database queries with the query builder
-// Request   = represents the current HTTP request (params, files, headers...)
-// Hash      = securely hash passwords (bcrypt/argon)
+// Route = defines HTTP endpoints (GET/POST/etc) and their handlers
+// DB = run database queries with the query builder
+// Request = represents the current HTTP request (params, files, headers...)
+// Hash = securely hash passwords (bcrypt/argon)
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
-// -------- helpers ----------
+// ------------------------------
+// Helpers
+// ------------------------------
 /**
  * render_rows()
  * Helper that builds the HTML rows for users table
@@ -83,7 +84,9 @@ function render_rows($rows, $token, $editing = null): string
     return $html;
 }
 
-// -------- page ----------
+// ------------------------------
+// Page
+// ------------------------------
 // $req = current Request
 Route::get('/', function (Request $req) {
 
@@ -126,6 +129,7 @@ Route::get('/', function (Request $req) {
     $html .= "<!DOCTYPE html><html><head><meta charset='UTF-8'>";
     $html .= "<link rel='stylesheet' href='/css/style.css'>";
     $html .= "<script src='/js/app.js' defer></script>";
+    $html .= "<script src='/js/sort.js' defer></script>";
     $html .= "<title>Users</title></head><body>";
 
     $html .= "<div id='alerts'>";
@@ -150,6 +154,16 @@ Route::get('/', function (Request $req) {
     $html .= "<button class='btn primary' type='submit'>Save</button>";
     $html .= "</form>";
 
+    // Order alphabetically 
+    $html .= "<div class='toolbar'>";
+    $html .= "  <label>Sort by name: ";
+    $html .= "    <select id='sort-by-name'>";
+    $html .= "      <option value='asc'>A–Z</option>";
+    $html .= "      <option value='desc'>Z–A</option>";
+    $html .= "    </select>";
+    $html .= "  </label>";
+    $html .= "</div>";
+
     // Table
     $html .= "<h2>Users</h2>";
     $html .= "<table class='table'>";
@@ -166,6 +180,30 @@ Route::get('/', function (Request $req) {
 
     $html .= "</body></html>";
     return $html;
+});
+
+Route::get('/users-tbody', function (Request $req) {
+    $dir = strtolower($req->query('sort', 'asc')) === 'desc' ? 'desc' : 'asc';
+
+    $rows = DB::table('users')
+        ->leftJoin('specs', 'specs.user_id', '=', 'users.id')
+        ->select(
+            'users.id',
+            'users.name',
+            'users.email',
+            'users.city',
+            'users.state',
+            'specs.job',
+            'specs.salary',
+            'specs.description'
+        )
+        ->orderBy('users.name', $dir)
+        ->get();
+
+    return response()->json([
+        'ok'   => true,
+        'html' => render_rows($rows, csrf_token()),
+    ]);
 });
 
 // ------------------------------------------
